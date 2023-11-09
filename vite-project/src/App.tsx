@@ -1,34 +1,60 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React from 'react'
+import { Routes, Route } from 'react-router-dom'
+import { Home } from './components/Home.tsx'
+import { About } from './components/About.tsx'
+import { Navbar } from './components/Navbar.tsx'
+import { OrderSummary } from './components/OrderSummary.tsx'
+import { NewProducts } from './components/NewProducts.tsx'
+import { FeaturedProducts } from './components/FeaturedProducts.tsx'
+import { Products } from './components/Products.tsx'
+import { NoMatch } from './components/NoMatch.tsx'
+import { Users } from './components/Users.tsx'
+import { UserDetails } from './components/UserDetails.tsx'
+import { Admin } from './components/Admin.tsx'
+import { AuthProvider } from './components/auth.tsx'
+import { Login } from './components/Login.tsx'
+import { Profile } from './components/Profile.tsx'
+import { RequireAuth } from './components/RequireAuth.tsx'
+
+const LazyAbout = React.lazy(() => import('./components/About.tsx'))
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <AuthProvider>
+      <Navbar />
+      <Routes>
+        <Route path='/' element={<Home />} />
+        <Route path='/login' element={<Login />} />
+        <Route
+          path='/profile'
+          element={
+            <RequireAuth>
+              <Profile />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path='about'
+          element={
+            <React.Suspense fallback='Loading...'>
+              <LazyAbout />
+            </React.Suspense>
+          }
+        />
+        <Route path='order-summary' element={<OrderSummary />} />
+        <Route path='products' element={<Products />}>
+          <Route index element={<FeaturedProducts />} />
+          <Route path='featured' element={<FeaturedProducts />} />
+          <Route path='new' element={<NewProducts />} />
+        </Route>
+        <Route path='users' element={<Users />}>
+          <Route path=':userId' element={<UserDetails />} />
+          <Route path='admin' element={<Admin />} />
+        </Route>
+
+        <Route path='*' element={<NoMatch />} />
+      </Routes>
+    </AuthProvider>
   )
 }
 
